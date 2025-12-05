@@ -1,0 +1,12 @@
+{
+  "henghengmao": {
+    "user_id": "your_user_id_here",
+    "secret_key": "your_secret_key_here",
+    "base_url": "https://tiktok.henghengmao.com"
+  },
+  "download": {
+    "max_concurrent": 10,
+    "skip_existing": true,
+    "max_posts_per_account": null
+  }
+}

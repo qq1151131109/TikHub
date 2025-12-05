@@ -1,0 +1,18 @@
+{
+  "摄影": [
+    {
+      "username": "natgeo",
+      "url": "https://www.instagram.com/natgeo/"
+    }
+  ],
+  "科技": [
+    {
+      "username": "tech",
+      "url": "https://www.instagram.com/tech/"
+    }
+  ],
+  "旅游": [
+    "https://www.instagram.com/beautifuldestinations/",
+    "https://www.instagram.com/earthpix/"
+  ]
+}

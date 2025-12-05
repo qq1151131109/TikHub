@@ -1,0 +1,10 @@
+# Instagram 账号列表（每行一个）
+# 支持 URL 或用户名
+
+https://www.instagram.com/natgeo/
+https://www.instagram.com/instagram/
+https://www.instagram.com/nasa/
+
+# 也可以直接写用户名
+earthpix
+beautifuldestinations
