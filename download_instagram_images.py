@@ -140,7 +140,7 @@ class HenghengMaoAPI:
             try:
                 # 1. 获取用户 ID
                 user_info = await self._make_request(
-                    "/api/v1/instagram/web_app/fetch_user_info_by_username",
+                    "/api/v1/instagram/v1/fetch_user_info_by_username",
                     params={"username": username}
                 )
 
@@ -148,26 +148,30 @@ class HenghengMaoAPI:
                     print(f"❌ 无法获取用户信息: {username}")
                     return []
 
-                user_id = user_info.get("data", {}).get("id")
+                # TikHub API v1 格式: data.data.user.id
+                user_id = (user_info.get("data", {})
+                          .get("data", {})
+                          .get("user", {})
+                          .get("id"))
                 if not user_id:
                     print(f"❌ 用户 ID 不存在: {username}")
                     return []
 
                 # 2. 获取帖子列表 (分页)
                 all_posts = []
-                end_cursor = None
-                has_next_page = True
+                max_id = None
+                has_more = True
 
-                while has_next_page:
+                while has_more:
                     params = {
                         "user_id": user_id,
                         "count": 12  # 每页获取 12 个帖子
                     }
-                    if end_cursor:
-                        params["end_cursor"] = end_cursor
+                    if max_id:
+                        params["max_id"] = max_id
 
                     posts_data = await self._make_request(
-                        "/api/v1/instagram/web_app/fetch_user_posts_by_user_id",
+                        "/api/v1/instagram/v1/fetch_user_posts",
                         params=params
                     )
 
@@ -175,33 +179,24 @@ class HenghengMaoAPI:
                         print(f"❌ 获取帖子列表失败: {username}")
                         break
 
-                    # 提取帖子
-                    edges = (posts_data.get("data", {})
-                            .get("data", {})
-                            .get("user", {})
-                            .get("edge_owner_to_timeline_media", {})
-                            .get("edges", []))
+                    # TikHub API v1 格式: data.items[]
+                    items = posts_data.get("data", {}).get("items", [])
 
-                    for edge in edges:
-                        all_posts.append(edge.get("node", {}))
+                    for item in items:
+                        all_posts.append(item)
+                        # 保存最后一个帖子的 ID 用于分页
+                        max_id = item.get("id")
 
-                    # 检查分页
-                    page_info = (posts_data.get("data", {})
-                                .get("data", {})
-                                .get("user", {})
-                                .get("edge_owner_to_timeline_media", {})
-                                .get("page_info", {}))
-
-                    has_next_page = page_info.get("has_next_page", False)
-                    end_cursor = page_info.get("end_cursor")
+                    # 检查是否还有更多
+                    has_more = posts_data.get("data", {}).get("more_available", False)
 
                     # 如果设置了最大数量限制，检查是否已达到
                     if max_posts is not None and len(all_posts) >= max_posts:
                         all_posts = all_posts[:max_posts]
                         break
 
-                    # 如果没有更多帖子或没有 cursor，退出
-                    if not has_next_page or not end_cursor:
+                    # 如果没有更多帖子，退出
+                    if not has_more or not items:
                         break
 
                 return all_posts
@@ -217,38 +212,49 @@ class HenghengMaoAPI:
         从帖子中提取所有图片信息
 
         Args:
-            post: TikHub API 返回的帖子节点数据
+            post: TikHub API 返回的帖子数据
 
         Returns:
             [{"url": "...", "post_id": "...", "index": 0}, ...]
         """
         images = []
-        post_id = post.get("id") or post.get("shortcode") or "unknown"
-        post_type = post.get("__typename", "")
+        post_id = post.get("code") or post.get("id") or "unknown"
 
-        # 优先使用 display_url (主图片)
-        display_url = post.get("display_url")
-        if display_url:
-            images.append({
-                "url": display_url,
-                "post_id": post_id,
-                "index": 0
-            })
+        def get_best_image_url(item: Dict) -> Optional[str]:
+            """从 item 中获取最佳图片 URL"""
+            # TikHub API v1 格式: image_versions2.candidates[0].url
+            candidates = item.get("image_versions2", {}).get("candidates", [])
+            if candidates:
+                # 选择最大尺寸的图片
+                best = max(candidates, key=lambda c: c.get("width", 0) * c.get("height", 0))
+                return best.get("url")
+            return None
 
-        # 如果是轮播帖子 (GraphSidecar)，可能需要额外处理
-        # 但从 TikHub API 的响应来看，每个帖子节点已经是展开的单个媒体
-        # 所以这里只需要提取 display_url 即可
-
-        # 如果没有 display_url，尝试其他字段
-        if not images:
-            # 尝试 thumbnail_src (缩略图)
-            thumbnail_src = post.get("thumbnail_src")
-            if thumbnail_src:
-                images.append({
-                    "url": thumbnail_src,
-                    "post_id": post_id,
-                    "index": 0
-                })
+        # 检查是否是轮播帖子
+        carousel_media = post.get("carousel_media", [])
+        if carousel_media:
+            # 轮播帖子：提取每个媒体的图片
+            for idx, media in enumerate(carousel_media):
+                # 只处理图片类型 (media_type == 1)
+                if media.get("media_type") == 1:
+                    url = get_best_image_url(media)
+                    if url:
+                        images.append({
+                            "url": url,
+                            "post_id": post_id,
+                            "index": idx
+                        })
+        else:
+            # 单张图片帖子
+            # 只处理图片类型 (media_type == 1)
+            if post.get("media_type") == 1:
+                url = get_best_image_url(post)
+                if url:
+                    images.append({
+                        "url": url,
+                        "post_id": post_id,
+                        "index": 0
+                    })
 
         return images
 
