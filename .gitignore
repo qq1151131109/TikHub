@@ -22,7 +22,9 @@ data/*.txt
 
 # 下载的文件
 output/
+output_backup*/
 downloads/
+test_output/
 
 # 临时文件
 *.tmp

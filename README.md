@@ -8,10 +8,17 @@
 |------|------|------|--------|
 | Instagram | ✅ | ✅ | - |
 | 小红书 | ✅ | ✅ | ✅ (xhslink.com) |
+| 抖音 | ✅ | ✅ | ✅ (v.douyin.com) |
+| TikTok | ✅ | ✅ | ✅ (vm.tiktok.com) |
+| Twitter/X | ✅ | ✅ | - |
+| YouTube | ✅ | ⚠️ | - |
+| Bilibili | ✅ | ⚠️ | ✅ (b23.tv) |
+
+> ⚠️ YouTube 和 Bilibili 视频下载需要额外处理，目前主要支持封面图片下载
 
 ## 功能特点
 
-- ✅ **多平台支持** - Instagram、小红书，更多平台开发中
+- ✅ **多平台支持** - Instagram、小红书、抖音、TikTok、Twitter/X、YouTube、Bilibili
 - ✅ **自动平台识别** - 根据 URL 自动检测平台类型
 - ✅ **批量下载** - 支持多账号批量下载
 - ✅ **媒体类型过滤** - 可选择只下载图片或视频
@@ -50,6 +57,11 @@ export TIKHUB_API_KEY_BACKUP="your_backup_key"
 # 下载单个账号（自动识别平台）
 python tikhub_downloader.py --url "https://www.instagram.com/natgeo/"
 python tikhub_downloader.py --url "https://www.xiaohongshu.com/user/profile/xxx"
+python tikhub_downloader.py --url "https://www.douyin.com/user/MS4wLjABxxx"
+python tikhub_downloader.py --url "https://www.tiktok.com/@username"
+python tikhub_downloader.py --url "https://twitter.com/elonmusk"
+python tikhub_downloader.py --url "https://space.bilibili.com/123456"
+python tikhub_downloader.py --url "https://www.youtube.com/@channelname"
 
 # 只下载图片
 python tikhub_downloader.py --url "..." --images-only

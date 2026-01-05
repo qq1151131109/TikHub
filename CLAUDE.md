@@ -9,6 +9,11 @@ TikHub 多平台下载器 - A Python tool for downloading images, videos, and au
 **Supported Platforms:**
 - Instagram (instagram.com, instagr.am)
 - 小红书 Xiaohongshu (xiaohongshu.com, xhslink.com)
+- 抖音 Douyin (douyin.com, v.douyin.com)
+- TikTok (tiktok.com, vm.tiktok.com)
+- Twitter/X (twitter.com, x.com)
+- YouTube (youtube.com, youtu.be)
+- Bilibili (bilibili.com, b23.tv)
 
 ## Development Setup
 
@@ -72,6 +77,11 @@ python tikhub_downloader.py --url "https://www.instagram.com/natgeo/" --max-post
 |----------|-------------|--------------|---------------|
 | Instagram | InstagramClient | instagram.com, instagr.am | /api/v1/instagram/v1/... |
 | Xiaohongshu | XiaohongshuClient | xiaohongshu.com, xhslink.com | /api/v1/xiaohongshu/app/v1/... |
+| Douyin | DouyinClient | douyin.com, v.douyin.com | /api/v1/douyin/web/... |
+| TikTok | TikTokClient | tiktok.com, vm.tiktok.com | /api/v1/tiktok/web_api/v1/... |
+| Twitter | TwitterClient | twitter.com, x.com | /api/v1/twitter/web/... |
+| YouTube | YouTubeClient | youtube.com, youtu.be | /api/v1/youtube/web/... |
+| Bilibili | BilibiliClient | bilibili.com, b23.tv | /api/v1/bilibili/web/... |
 
 ### Adding New Platforms
 
